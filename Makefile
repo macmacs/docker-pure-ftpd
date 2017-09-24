@@ -26,7 +26,7 @@ setup-bob:
 # simple test to list files, upload a file, download it to a new name, delete it via ftp and read the new local one to make sure it's in tact
 test-bob:
 	echo "Test file was read successfully!" > test-orig-file.txt
-	echo "user john testpw\n\
+	echo "user bob test\n\
 	ls -alh\n\
 	put test-orig-file.txt\n\
 	ls -alh\n\
