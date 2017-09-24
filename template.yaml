@@ -1,0 +1,248 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: pureftpserver
+  annotations:
+    openshift.io/display-name: "Pure-ftpd Server (by macmacs)"
+    tags: "nzb"
+    iconClass: pficon-save
+    template.openshift.io/provider-display-name: "macmacs"
+    template.openshift.io/documentation-url: "https://github.com/macmacs/"
+    template.openshift.io/support-url: "https://github.com/macmacs/docker-pure-ftpd/issues"
+objects:
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: ${APPLICATION_NAME}
+    annotations:
+      template.openshift.io/expose-username: "{.data['ftp-user']}"
+      template.openshift.io/expose-password: "{.data['ftp-password']}"
+    labels:
+      app: "${APPLICATION_NAME}"
+  stringData:
+    ftp-user: "${FTP_USER}"
+    ftp-password: "${FTP_PASSWORD}"
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: "${APPLICATION_NAME}"
+    name: "${APPLICATION_NAME}"
+    #namespace: openshift
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: macmacs/pure-ftpd
+      from:
+        kind: DockerImage
+        name: macmacs/pure-ftpd:latest
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+  status: {}
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: "${APPLICATION_NAME}"
+    name: "${APPLICATION_NAME}"
+  spec:
+    replicas: 1
+    selector:
+      app: "${APPLICATION_NAME}"
+      deploymentconfig: "${APPLICATION_NAME}"
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: "${APPLICATION_NAME}"
+          deploymentconfig: "${APPLICATION_NAME}"
+      spec:
+        containers:
+        - env:
+          - name: USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: "${APPLICATION_NAME}"
+                key: ftp-user
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "${APPLICATION_NAME}"
+                key: ftp-password
+          - name: PUBLICHOST
+            value: "${PUBLICHOST}"
+          - name: ADDED_FLAGS
+            value: "${ADDED_FLAGS}"
+#          - name: PUID
+#            value: "1200"
+#          - name: PGID
+#            value: "1200"
+          image: macmacs/pure-ftpd
+          imagePullPolicy: Always
+          name: "${APPLICATION_NAME}"
+          ports:
+          - containerPort: 21
+            protocol: TCP
+          - containerPort: 30000
+            protocol: TCP
+          - containerPort: 30001
+            protocol: TCP
+          - containerPort: 30002
+            protocol: TCP
+          - containerPort: 30003
+            protocol: TCP
+          - containerPort: 30004
+            protocol: TCP
+          - containerPort: 30005
+            protocol: TCP
+          - containerPort: 30006
+            protocol: TCP
+          - containerPort: 30007
+            protocol: TCP
+          - containerPort: 30008
+            protocol: TCP
+          - containerPort: 30009
+            protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /home/ftpusers
+              name: pureftpserver-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+          - hostPath:
+              path: "${LOCAL_FTP_USER_DATA_PATH}"
+            name: pureftpserver-data
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${APPLICATION_NAME}"
+        from:
+          kind: ImageStreamTag
+          name: "${APPLICATION_NAME}:latest"
+      type: ImageChange
+- kind: Service
+  apiVersion: v1
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: "${APPLICATION_NAME}"
+    name: "${APPLICATION_NAME}"
+  spec:
+    ports:
+    - name: 21-tcp
+      port: 21
+      nodePort: 30021
+      protocol: TCP
+      targetPort: 21
+    - name: 30000-tcp
+      port: 30000
+      nodePort: 30000
+      protocol: TCP
+      targetPort: 30000
+    - name: 30001-tcp
+      port: 30001
+      nodePort: 30001
+      protocol: TCP
+      targetPort: 30001
+    - name: 30002-tcp
+      port: 30002
+      nodePort: 30002
+      protocol: TCP
+      targetPort: 30002
+    - name: 30003-tcp
+      port: 30003
+      nodePort: 30003
+      protocol: TCP
+      targetPort: 30003
+    - name: 30004-tcp
+      port: 30004
+      nodePort: 30004
+      protocol: TCP
+      targetPort: 30004
+    - name: 30005-tcp
+      port: 30005
+      nodePort: 30005
+      protocol: TCP
+      targetPort: 30005
+    - name: 30006-tcp
+      port: 30006
+      nodePort: 30006
+      protocol: TCP
+      targetPort: 30006
+    - name: 30007-tcp
+      port: 30007
+      nodePort: 30007
+      protocol: TCP
+      targetPort: 30007
+    - name: 30008-tcp
+      port: 30008
+      nodePort: 30008
+      protocol: TCP
+      targetPort: 30008
+    - name: 30009-tcp
+      port: 30009
+      nodePort: 30009
+      protocol: TCP
+      targetPort: 30009
+    selector:
+      deploymentconfig: "${APPLICATION_NAME}"
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+parameters:
+- name: APPLICATION_NAME
+  displayName: Application Name
+  description: The name of the application.
+  value: pureftpserver
+  required: true
+- name: FTP_USER
+  displayName: FTP Connection Username
+  description: Username for FTP user that will be used for accessing the database.
+  generate: expression
+  from: user[A-Z0-9]{5}
+  required: true
+- name: FTP_PASSWORD
+  displayName: FTP Connection Password
+  description: Password for the FTP connection user.
+  generate: expression
+  from: "[a-zA-Z0-9]{16}"
+  required: true
+- name: LOCAL_FTP_USER_DATA_PATH
+  displayName: Local path on host for user data
+  description: Local path on host for user data
+  value: /tmp
+  required: true
+- name: PUBLICHOST
+  displayName: Public hostname of services
+  description: Public hostname of services
+  value: localhost
+  required: true
+- name: ADDED_FLAGS
+  displayName: ADDED_FLAGS
+  description: ADDED_FLAGS
+  value: -d -d
