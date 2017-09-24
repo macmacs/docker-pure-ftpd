@@ -22,7 +22,6 @@ enter:
 setup-bob:
 	sudo docker exec -it ftpd_server sh -c "(echo test; echo test) | pure-pw useradd bob -f /etc/pure-ftpd/passwd/pureftpd.passwd -m -u ftpuser -d /home/ftpusers/bob"
 	@echo "User bob setup with password: test"
-	ls /etc/pure-ftpd/passwd/
 
 # simple test to list files, upload a file, download it to a new name, delete it via ftp and read the new local one to make sure it's in tact
 test-bob:
