@@ -4,7 +4,12 @@ build:
 	sudo docker build --rm -t pure-ftp-demo .
 
 run: kill
-	sudo docker run -d --name ftpd_server -p 21:21 -p 30000-30009:30000-30009 -e "PUBLICHOST=localhost" -e "ADDED_FLAGS=-d -d" pure-ftp-demo
+	sudo docker run -d --name ftpd_server -p 21:21 -p 30000-30009:30000-30009 -e USERNAME="john" -e PASSWORD=test -e "PUBLICHOST=localhost" -e "ADDED_FLAGS=-d -d" pure-ftp-demo
+
+logs:
+	@echo "\n#####"
+	docker logs -f ftpd_server
+	@echo "#####\n"
 
 kill:
 	-sudo docker kill ftpd_server
@@ -17,11 +22,12 @@ enter:
 setup-bob:
 	sudo docker exec -it ftpd_server sh -c "(echo test; echo test) | pure-pw useradd bob -f /etc/pure-ftpd/passwd/pureftpd.passwd -m -u ftpuser -d /home/ftpusers/bob"
 	@echo "User bob setup with password: test"
+	ls /etc/pure-ftpd/passwd/
 
 # simple test to list files, upload a file, download it to a new name, delete it via ftp and read the new local one to make sure it's in tact
 test-bob:
 	echo "Test file was read successfully!" > test-orig-file.txt
-	echo "user bob test\n\
+	echo "user john testpw\n\
 	ls -alh\n\
 	put test-orig-file.txt\n\
 	ls -alh\n\
@@ -31,6 +37,9 @@ test-bob:
 	cat test-new-file.txt
 	rm test-orig-file.txt test-new-file.txt
 
+test-john:
+	sleep 5
+	echo "user john test" | ftp -n -v -p localhost 21
 
 # git commands for quick chaining of make commands
 push:

@@ -11,3 +11,4 @@ before_install:
 
 script:
   - make test-bob
+  - make test-john
