@@ -1,18 +1,18 @@
 
-Docker Pure-ftpd Server
+Docker Pure-ftpd Server - OpenShift ready!
 ============================
-https://hub.docker.com/r/stilliard/pure-ftpd/
 
-[![Build Status](https://travis-ci.org/stilliard/docker-pure-ftpd.svg?branch=master)](https://travis-ci.org/stilliard/docker-pure-ftpd)
-[![Docker Build Status](https://img.shields.io/docker/build/stilliard/pure-ftpd.svg)](https://hub.docker.com/r/stilliard/pure-ftpd/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/stilliard/pure-ftpd.svg)](https://hub.docker.com/r/stilliard/pure-ftpd/)
+
+[![Build Status](https://travis-ci.org/macmacs/docker-pure-ftpd.svg?branch=master)](https://travis-ci.org/macmacs/docker-pure-ftpd)
+[![Docker Build Status](https://img.shields.io/docker/build/macmacs/pure-ftpd.svg)](https://hub.docker.com/r/macmacs/pure-ftpd/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/macmacs/pure-ftpd.svg)](https://hub.docker.com/r/macmacs/pure-ftpd/)
 
 Pull down with docker:
 ```bash
-docker pull stilliard/pure-ftpd:hardened
+docker pull macmacs/pure-ftpd:hardened
 ```
 
-**Often needing to run as `sudo`, e.g. `sudo docker pull stilliard/pure-ftpd`**
+**Often needing to run as `sudo`, e.g. `sudo docker pull macmacs/pure-ftpd`**
 
 ----------------------------------------
 
@@ -22,7 +22,7 @@ This is because rebuilding the entire docker image via a fork can be slow as it 
 Instead you can create a new project with a `DOCKERFILE` like so:
 
 ```
-FROM stilliard/pure-ftpd
+FROM macmacs/pure-ftpd
 
 # e.g. you could change the defult command run:
 CMD /run.sh -c 30 -C 10 -l puredb:/etc/pure-ftpd/pureftpd.pdb -E -j -R -P $PUBLICHOST -p 30000:30059
@@ -35,9 +35,9 @@ CMD /run.sh -c 30 -C 10 -l puredb:/etc/pure-ftpd/pureftpd.pdb -E -j -R -P $PUBLI
 Starting it 
 ------------------------------
 
-`docker run -d --name ftpd_server -p 21:21 -p 30000-30009:30000-30009 -e "PUBLICHOST=localhost" stilliard/pure-ftpd:hardened`
+`docker run -d --name ftpd_server -p 21:21 -p 30000-30009:30000-30009 -e "PUBLICHOST=localhost" macmacs/pure-ftpd:hardened`
 
-*Or for your own image, replace stilliard/pure-ftpd with the name you built it with, e.g. my-pure-ftp*
+*Or for your own image, replace macmacs/pure-ftpd with the name you built it with, e.g. my-pure-ftp*
 
 You can also pass ADDED_FLAGS as an env variable to add additional options such as --tls to the pure-ftpd command.  
 e.g. ` -e "ADDED_FLAGS=--tls=2" `
@@ -57,7 +57,7 @@ pure-pw useradd bob -f /etc/pure-ftpd/passwd/pureftpd.passwd -m -u ftpuser -d /h
 ```
 *No restart should be needed.*
 
-*If you have any trouble with volume permissions due to the **uid** or **gid** of the created user you can change the **-u** flag for the uid you would like to use and/or specify **-g** with the group id as well. For more information see issue [#35](https://github.com/stilliard/docker-pure-ftpd/issues/35#issuecomment-325583705).*
+*If you have any trouble with volume permissions due to the **uid** or **gid** of the created user you can change the **-u** flag for the uid you would like to use and/or specify **-g** with the group id as well. For more information see issue [#35](https://github.com/macmacs/docker-pure-ftpd/issues/35#issuecomment-325583705).*
 
 More info on usage here: https://download.pureftpd.org/pure-ftpd/doc/README.Virtual-Users
 
@@ -97,7 +97,7 @@ Tags available for different versions
 
 - `latest` - latest working version
 - `jessie-latest` - latest but will always remain on debian jessie
-- `hardened` - latest + [more secure/hardened defaults](https://github.com/stilliard/docker-pure-ftpd/issues/10)
+- `hardened` - latest + [more secure/hardened defaults](https://github.com/macmacs/docker-pure-ftpd/issues/10)
 
 **Previous version before tags were introduced**
 
@@ -111,7 +111,7 @@ Tags available for different versions
 *Check the tags on github for available versions, feel free to submit issues and/or pull requests for newer versions*
 
 Usage of specific tags: 
-`sudo docker pull stilliard/pure-ftpd:hardened-1.0.36`
+`sudo docker pull macmacs/pure-ftpd:hardened-1.0.36`
 
 ----------------------------------------
 
@@ -135,7 +135,7 @@ For more information please see `man pure-ftpd`, or visit: https://www.pureftpd.
 
 Why so many ports opened?
 ---------------------------
-This is for PASV support, please see: [#5 PASV not fun :)](https://github.com/stilliard/docker-pure-ftpd/issues/5)
+This is for PASV support, please see: [#5 PASV not fun :)](https://github.com/macmacs/docker-pure-ftpd/issues/5)
 
 ----------------------------------------
 
@@ -165,7 +165,7 @@ docker volume create --name my-db-volume
 
 Specify it when running the container:
 ```
-docker run -d --name ftpd_server -p 21:21 -p 30000-30009:30000-30009 -e "PUBLICHOST=localhost" -v my-db-volume:/etc/pure-ftpd/passwd stilliard/pure-ftpd:hardened
+docker run -d --name ftpd_server -p 21:21 -p 30000-30009:30000-30009 -e "PUBLICHOST=localhost" -v my-db-volume:/etc/pure-ftpd/passwd macmacs/pure-ftpd:hardened
 ```
 
 When an user is added, you need to use the password file which is in the volume:
@@ -186,7 +186,7 @@ pure-pw passwd bob -f /etc/pure-ftpd/passwd/pureftpd.passwd -m
 Development (via git clone)
 ```bash
 # Clone the repo
-git clone https://github.com/stilliard/docker-pure-ftpd.git
+git clone https://github.com/macmacs/docker-pure-ftpd.git
 cd docker-pure-ftpd
 # Build the image
 make build
